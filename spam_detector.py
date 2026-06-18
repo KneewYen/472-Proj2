@@ -7,7 +7,9 @@ feature extraction and a Naive Bayes classifier.
 import sys
 
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
+import seaborn as sns
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics import accuracy_score, confusion_matrix
 from sklearn.model_selection import train_test_split
@@ -78,6 +80,22 @@ def print_evaluation(accuracy, cm):
     print(f"Actual Ham    {cm[1][0]:<6} {cm[1][1]:<6}")
 
 
+def plot_confusion_matrix(cm):
+    """Heatmap of the confusion matrix saved to confusion_matrix.png."""
+    cm_array = np.array(cm)
+    labels = ["Spam", "Ham"]
+    plt.figure(figsize=(5, 4))
+    sns.heatmap(cm_array, annot=True, fmt="d", cmap="Blues",
+                xticklabels=labels, yticklabels=labels)
+    plt.title("Confusion Matrix")
+    plt.xlabel("Predicted")
+    plt.ylabel("Actual")
+    plt.tight_layout()
+    plt.savefig("confusion_matrix.png")
+    print("Saved confusion matrix heatmap to confusion_matrix.png")
+    plt.close()
+
+
 def predict_message(message, model, vectorizer):
     """Predict the label of a message and return (label, confidence)."""
     vec = vectorizer.transform([message])
@@ -111,6 +129,7 @@ def main():
     model, vectorizer, accuracy, cm = train_model(df)
 
     print_evaluation(accuracy, cm)
+    plot_confusion_matrix(cm)
     interactive_loop(model, vectorizer)
 
 
