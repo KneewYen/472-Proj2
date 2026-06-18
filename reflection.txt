@@ -1,0 +1,81 @@
+COMP 472 - Artificial Intelligence | Summer 2026
+Mini Project 2 - Reflection
+=====================================
+
+Team Members
+------------
+- Nguyen Le       | ID: 40272922
+- Karim Mawji     | ID: 40281154
+- Luca Ieraci     | ID: 40276520
+
+
+Contributions
+-------------
+Nguyen Le:
+  - Set up the Python virtual environment and installed all required
+    libraries (pandas, numpy, scikit-learn, matplotlib, seaborn)
+  - Implemented the load_dataset() method using pandas, including cleanup
+    of the malformed spam.csv header and extra blank columns
+  - Integrated all components into the final spam_detector.py script
+  - Ran end-to-end testing and captured screenshots of the program output
+
+Karim Mawji:
+  - Researched TfidfVectorizer and how text is converted into numerical
+    features
+  - Implemented the feature extraction step and the train_model() method,
+    including the train/test split and the MultinomialNB classifier
+  - Tuned the vectorizer and the Naive Bayes alpha parameter to improve
+    spam recall without hurting overall accuracy
+  - Contributed to the overall code structure and modularity
+
+Luca Ieraci:
+  - Implemented model evaluation (print_evaluation method) using
+    accuracy_score and confusion_matrix, formatted to match the required
+    output
+  - Implemented the confidence score logic (predict_message method) using
+    predict_proba
+  - Built the interactive prediction loop (interactive_loop method) with
+    error handling for empty input and the "quit" exit condition
+  - Implemented the data visualization bar chart and took charge of the
+    bulk of testing
+
+
+Difficulties Faced
+------------------
+1. Malformed dataset header:
+   The provided spam.csv had a typo'd header ("lable" instead of "label")
+   along with three extra unnamed trailing columns. We resolved this by
+   renaming the first two columns positionally after loading the CSV and
+   dropping the unused columns instead of relying on hardcoded column
+   names.
+
+2. Understanding TF-IDF from scratch:
+   None of us had used TfidfVectorizer before. We read the scikit-learn
+   documentation and experimented in a small test script to understand
+   that TF-IDF converts each message into a vector of weighted word
+   importance scores before it reaches the classifier.
+
+3. Low spam recall on the first trained model:
+   Our first model (default MultinomialNB with English stop-word removal)
+   reached 96.9% accuracy but missed 35 actual spam messages, since the
+   dataset is imbalanced (about 87% ham). We fixed this by removing
+   stop-word filtering and lowering the Naive Bayes alpha smoothing
+   parameter to 0.05, which raised accuracy to 98.4% and significantly
+   reduced missed spam messages.
+
+
+Time Breakdown
+--------------
+Task                                        | Time Spent
+--------------------------------------------|------------
+Understanding TF-IDF                        | 1.5 hours
+Environment setup and dependency install    | 0.5 hours
+Implementing dataset loading                | 1 hour
+Implementing feature extraction & training  | 2 hours
+Implementing model evaluation               | 1.5 hours
+Implementing confidence scores & chat loop  | 1 hour
+Building the visualization                  | 1 hour
+Testing and debugging                       | 2 hours
+Writing reflection                          | 0.5 hours
+--------------------------------------------|------------
+Total                                       | ~11 hours
