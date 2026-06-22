@@ -11,11 +11,19 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics import accuracy_score, confusion_matrix
+from sklearn.metrics import (
+    accuracy_score,
+    balanced_accuracy_score,
+    classification_report,
+    confusion_matrix,
+)
 from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import MultinomialNB
 
 DATASET_PATH = "spam.csv"
+LABEL_ORDER = ["spam", "ham"]
+LABEL_DISPLAY_NAMES = ["Spam", "Ham"]
+LABEL_COLORS = {"spam": "#d9534f", "ham": "#5cb85c"}
 
 
 def load_dataset(path):
@@ -37,9 +45,13 @@ def load_dataset(path):
 
 def plot_class_distribution(df):
     """Bar chart of spam vs ham message counts."""
-    counts = df["label"].value_counts()
+    counts = df["label"].value_counts().reindex(LABEL_ORDER, fill_value=0)
     plt.figure(figsize=(5, 4))
-    plt.bar(counts.index, counts.values, color=["#d9534f", "#5cb85c"])
+    plt.bar(
+        LABEL_DISPLAY_NAMES,
+        counts.values,
+        color=[LABEL_COLORS[label] for label in LABEL_ORDER],
+    )
     plt.title("Spam vs Ham Message Counts")
     plt.xlabel("Label")
     plt.ylabel("Number of Messages")
@@ -66,27 +78,43 @@ def train_model(df):
 
     y_pred = model.predict(X_test_vec)
     accuracy = accuracy_score(y_test, y_pred)
-    cm = confusion_matrix(y_test, y_pred, labels=["spam", "ham"])
+    balanced_accuracy = balanced_accuracy_score(y_test, y_pred)
+    cm = confusion_matrix(y_test, y_pred, labels=LABEL_ORDER)
+    report = classification_report(
+        y_test,
+        y_pred,
+        labels=LABEL_ORDER,
+        target_names=LABEL_DISPLAY_NAMES,
+        zero_division=0,
+    )
 
-    return model, vectorizer, accuracy, cm
+    return model, vectorizer, accuracy, balanced_accuracy, cm, report
 
 
-def print_evaluation(accuracy, cm):
+def print_evaluation(accuracy, balanced_accuracy, cm, report):
     print(f"Accuracy: {accuracy * 100:.1f}%")
+    print(f"Balanced Accuracy: {balanced_accuracy * 100:.1f}%")
     print("Confusion Matrix:")
     print("                Predicted")
     print("              Spam   Ham")
     print(f"Actual Spam   {cm[0][0]:<6} {cm[0][1]:<6}")
     print(f"Actual Ham    {cm[1][0]:<6} {cm[1][1]:<6}")
+    print("\nDetailed Metrics:")
+    print(report)
 
 
 def plot_confusion_matrix(cm):
     """Heatmap of the confusion matrix saved to confusion_matrix.png."""
     cm_array = np.array(cm)
-    labels = ["Spam", "Ham"]
     plt.figure(figsize=(5, 4))
-    sns.heatmap(cm_array, annot=True, fmt="d", cmap="Blues",
-                xticklabels=labels, yticklabels=labels)
+    sns.heatmap(
+        cm_array,
+        annot=True,
+        fmt="d",
+        cmap="Blues",
+        xticklabels=LABEL_DISPLAY_NAMES,
+        yticklabels=LABEL_DISPLAY_NAMES,
+    )
     plt.title("Confusion Matrix")
     plt.xlabel("Predicted")
     plt.ylabel("Actual")
@@ -126,9 +154,9 @@ def main():
     plot_class_distribution(df)
 
     print("Training model...")
-    model, vectorizer, accuracy, cm = train_model(df)
+    model, vectorizer, accuracy, balanced_accuracy, cm, report = train_model(df)
 
-    print_evaluation(accuracy, cm)
+    print_evaluation(accuracy, balanced_accuracy, cm, report)
     plot_confusion_matrix(cm)
     interactive_loop(model, vectorizer)
 
